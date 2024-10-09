@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Initial SAM Template for C2C Articles Processing
+
+Resources:
+  C2CArticlesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: c2c-articles
+
+  C2CArticlesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: c2c-articles-table
+      AttributeDefinitions:
+        - AttributeName: articleId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: articleId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  C2CArticlesProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/main.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref C2CArticlesBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref C2CArticlesTable
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref C2CArticlesTable
+          REGION: sa-east-1
+
+Outputs:
+  C2CArticlesBucket:
+    Description: "S3 Bucket for C2C Articles"
+    Value: !Ref C2CArticlesBucket
+  C2CArticlesTable:
+    Description: "DynamoDB Table for C2C Articles"
+    Value: !Ref C2CArticlesTable
+  C2CArticlesProcessorFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt C2CArticlesProcessorFunction.Arn

@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Update SAM Template for C2C Articles Processing - Add S3 Notification
+Resources:
+  C2CArticlesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: c2c-articles
+  C2CArticlesProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: C2CArticlesProcessorFunction
+      Handler: src/main.handler
+      Runtime: nodejs20.x
+    Metadata:
+      SamResourceId: C2CArticlesProcessorFunction
+  S3BucketNotificationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: C2CArticlesProcessorFunction
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - C2CArticlesBucket
+        - Arn
+  S3BucketNotification:
+    Type: AWS::S3::BucketNotification
+    Properties:
+      Bucket:
+        Ref: C2CArticlesBucket
+      NotificationConfiguration:
+        LambdaFunctionConfigurations:
+        - Event: s3:ObjectCreated:*
+          Function:
+            Fn::GetAtt:
+            - C2CArticlesProcessorFunction
+            - Arn
+Outputs:
+  C2CArticlesBucket:
+    Description: S3 Bucket for C2C Articles
+    Value:
+      Ref: C2CArticlesBucket
+  C2CArticlesProcessorFunction:
+    Description: Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - C2CArticlesProcessorFunction
+      - Arn

@@ -1,0 +1,2 @@
+pending to define the s3 trigger to lambda
+you have to do it manually since there is a problem about circular reference.

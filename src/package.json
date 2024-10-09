@@ -1,0 +1,11 @@
+{
+    "name": "c2c-articles-processor",
+    "version": "1.0.0",
+    "description": "Lambda function to process C2C articles",
+    "main": "src/main.js",
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.x.x",
+        "@aws-sdk/lib-dynamodb": "^3.x.x",
+        "uuid": "^9.x.x"
+    }
+}
